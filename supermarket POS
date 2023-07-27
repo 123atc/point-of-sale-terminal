@@ -1,0 +1,179 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+// Structure to represent a product
+struct Product {
+    string name;
+    double price;
+};
+
+// Function to check if the user is an administrator
+bool isAdmin() {
+    string email, password;
+    cout << "Enter your email: ";
+    cin >> email;
+    cout << "Enter your password: ";
+    cin >> password;
+
+    // In a real-world application, you would check the email and password against a database of administrators.
+    // For simplicity, let's use hardcoded credentials here.
+    return (email == "admin@example.com" && password == "admin123");
+}
+
+// Function to add a product to the inventory
+void addProduct(vector<Product>& inventory) {
+    Product product;
+    cout << "Enter product name: ";
+    cin >> product.name;
+    cout << "Enter product price: $";
+    cin >> product.price;
+    inventory.push_back(product);
+    cout << "Product added successfully.\n";
+}
+
+// Function to display the inventory
+void displayInventory(const vector<Product>& inventory) {
+    cout << "----- Inventory -----\n";
+    for (const auto& product : inventory) {
+        cout << product.name << ": $" << product.price << endl;
+    }
+    cout << "---------------------\n";
+}
+
+// Function to modify a product in the inventory
+void modifyProduct(vector<Product>& inventory) {
+    string productName;
+    cout << "Enter the name of the product to modify: ";
+    cin >> productName;
+
+    for (auto& product : inventory) {
+        if (product.name == productName) {
+            cout << "Enter the new price for " << product.name << ": $";
+            cin >> product.price;
+            cout << "Product modified successfully.\n";
+            return;
+        }
+    }
+
+    cout << "Product not found.\n";
+}
+
+// Function to delete a product from the inventory
+void deleteProduct(vector<Product>& inventory) {
+    string productName;
+    cout << "Enter the name of the product to delete: ";
+    cin >> productName;
+
+    for (auto it = inventory.begin(); it != inventory.end(); ++it) {
+        if (it->name == productName) {
+            inventory.erase(it);
+            cout << "Product deleted successfully.\n";
+            return;
+        }
+    }
+
+    cout << "Product not found.\n";
+}
+
+// Function to generate a receipt
+void generateReceipt(const vector<Product>& cart) {
+    cout << "----- Receipt -----\n";
+    double total = 0.0;
+    for (const auto& product : cart) {
+        cout << product.name << ": $" << product.price << endl;
+        total += product.price;
+    }
+    cout << "Total: $" << total << endl;
+    cout << "-------------------\n";
+}
+
+int main() {
+    vector<Product> inventory;
+    vector<Product> cart;
+
+    // Adding some initial products to the inventory for demonstration purposes
+    inventory.push_back({"apple", 0.5});
+    inventory.push_back({"banana", 0.25});
+    inventory.push_back({"bread", 1.5});
+    inventory.push_back({"milk", 1.0});
+    inventory.push_back({"cheese", 2.0});
+
+    while (true) {
+        cout << "==== Supermarket Point of Sale ====\n";
+        cout << "Options: 1. Buyer   2. Administrator   3. Exit\n";
+        int option;
+        cin >> option;
+
+        if (option == 1) {
+            // Buyer Mode
+            cout << "Available products:\n";
+            displayInventory(inventory);
+
+            while (true) {
+                cout << "Commands: add, receipt, back\n";
+                string command;
+                cin >> command;
+
+                if (command == "add") {
+                    string productName;
+                    cout << "Enter the name of the product to add to the cart: ";
+                    cin >> productName;
+
+                    for (const auto& product : inventory) {
+                        if (product.name == productName) {
+                            cart.push_back(product);
+                            cout << "Product added to the cart.\n";
+                            break;
+                        }
+                    }
+                } else if (command == "receipt") {
+                    generateReceipt(cart);
+                    break;
+                } else if (command == "back") {
+                    break;
+                } else {
+                    cout << "Invalid command. Try again.\n";
+                }
+            }
+
+            cart.clear(); // Clear the cart after generating the receipt.
+        } else if (option == 2) {
+            // Administrator Mode
+            if (!isAdmin()) {
+                cout << "Authentication failed. Only administrators are allowed.\n";
+                continue;
+            }
+
+            while (true) {
+                cout << "Administrator Mode\n";
+                cout << "Commands: add, modify, delete, view, back\n";
+                string command;
+                cin >> command;
+
+                if (command == "add") {
+                    addProduct(inventory);
+                } else if (command == "modify") {
+                    modifyProduct(inventory);
+                } else if (command == "delete") {
+                    deleteProduct(inventory);
+                } else if (command == "view") {
+                    displayInventory(inventory);
+                } else if (command == "back") {
+                    break;
+                } else {
+                    cout << "Invalid command. Try again.\n";
+                }
+            }
+        } else if (option == 3) {
+            cout << "Thank you for using the Supermarket Point of Sale. Goodbye!\n";
+            break;
+        } else {
+            cout << "Invalid option. Try again.\n";
+        }
+    }
+
+    return 0;
+}
